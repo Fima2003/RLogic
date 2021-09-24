@@ -1,0 +1,62 @@
+{
+  "project_info": {
+    "project_number": "378628925287",
+    "project_id": "rlabs-rlogic",
+    "storage_bucket": "rlabs-rlogic.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:378628925287:android:1f0a9f28fc4406c8c1f1c2",
+        "android_client_info": {
+          "package_name": "com.rlabs.rlogic"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "378628925287-oeacvn6vg3461devpues24hfg376j8pi.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.rlabs.rlogic",
+            "certificate_hash": "a62e312a7fd7451e92bda4e90f007b4554f2d8d5"
+          }
+        },
+        {
+          "client_id": "378628925287-srdurpi938t7hhe3ntdgvbnuri9kp2ok.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.rlabs.rlogic",
+            "certificate_hash": "6c561c0bf588466ead4450d22a69d8bbd48b5630"
+          }
+        },
+        {
+          "client_id": "378628925287-i50hdfj7arp0820l1335fl6s993bbcof.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBrAe63yFeu4u-DB3Y3K1LHCcHw1oYnuA8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "378628925287-i50hdfj7arp0820l1335fl6s993bbcof.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "378628925287-8p6ugpbt0g3cg1phnrie6tghrv0tsc67.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.rlabs.rlogic"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
