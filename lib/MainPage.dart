@@ -142,7 +142,6 @@ class _MainPageState extends State<MainPage>{
             color: UserData.getTheme() == "Dark" ? Theme.of(context).primaryColorLight: Theme.of(context).primaryColorLight,
             onPressed: () => Share.share(
               'Check this cool app out: https://play.google.com/store/apps/details?id=com.rlabs.rlogic',
-              subject: 'This is an app'
             ),
             splashRadius: mq.width*0.05,
             iconSize: mq.width*0.08,

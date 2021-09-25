@@ -3,14 +3,42 @@ import 'dart:math';
 import 'package:trotter/trotter.dart';
 
 void main(){
-  final field = generateField(4);
-  final allPossibleFields = allFields(field);
-  for(int i = 0; i < field.length; i++){
-    for(int j = 0; j < field[i].length; j++){
-      stdout.write("${field[i][j]} ");
+}
+
+generateGame(int size, String difficulty){
+  var field = generateField(size);
+  Map<String, dynamic> result = {"field": field};
+  var sides = sideCounts(field, size);
+  var rand = new Random();
+  var splitSides;
+  if(size == 4){
+    int amountOfTips = rand.nextInt(3)+6;
+    splitSides = generateLimitedAmountOfSideValues(sides, amountOfTips);
+  }else if(size == 5){
+    if(difficulty == "Easy"){
+      int amountOfTips = rand.nextInt(2) + 11;
+      splitSides = generateLimitedAmountOfSideValues(sides, amountOfTips);
+    }else if(difficulty == "Medium"){
+      int amountOfTips = rand.nextInt(2) + 9;
+      splitSides = generateLimitedAmountOfSideValues(sides, amountOfTips);
+    }else{
+      int amountOfTips = rand.nextInt(2) + 11;
+      splitSides = generateLimitedAmountOfSideValues(sides, amountOfTips);
     }
-    stdout.write('\n');
+  }else{
+    if(difficulty == "Easy"){
+      int amountOfTips = rand.nextInt(3) + 19;
+      splitSides = generateLimitedAmountOfSideValues(sides, amountOfTips);
+    }else if(difficulty == "Medium"){
+      int amountOfTips = rand.nextInt(3) + 17;
+      splitSides = generateLimitedAmountOfSideValues(sides, amountOfTips);
+    }else if(difficulty == "Hard"){
+      int amountOfTips = rand.nextInt(3) + 13;
+      splitSides = generateLimitedAmountOfSideValues(sides, amountOfTips);
+    }
   }
+  result["SideTips"] = splitSides;
+  return result;
 }
 
 // A function that generates field
@@ -98,94 +126,54 @@ List<int> seenFromBottom(var field, int length){
 // A Function that unites answers of previous four functions in one array
 List<List<int>> sideCounts(var field, int length){
   return [
-    seenFromLeft(field, length),
     seenFromTop(field, length),
     seenFromRight(field, length),
-    seenFromBottom(field, length)
+    seenFromBottom(field, length),
+    seenFromLeft(field, length)
   ];
 }
 
-generateLimitedAmountOfSideValues(List<List<int>> field, List<List<int>> sides, int minAmountOfHints){
-  var rand = new Random();
-  List<List<List<int>>> fields = allFields(field);
-  int amountOfDoublesInARow = 0;
-  while(amountOfLeft(sides) > minAmountOfHints && amountOfDoublesInARow < amountOfLeft(sides)){
-    late int rowForElimination, colForElimination;
-    int nextForDeletion = rand.nextInt(sides[0].length*sides[0].length) + 1;
-    while(nextForDeletion > 0){
-      for(int i = 0; i < sides.length; i++){
-        for(int j = 0; j < sides[i].length; j++){
-          if(nextForDeletion > 0 && sides[i][j] != 0){
-            nextForDeletion--;
-            rowForElimination = i;
-            colForElimination = j;
-          }
-        }
-      }
-    }
-    int value = sides[rowForElimination][colForElimination];
-    if(correctFieldsWithoutOneSideValue(rowForElimination, colForElimination, fields, sides) == 1){
-      sides[rowForElimination][colForElimination] = 0;
-      amountOfDoublesInARow = 0;
+List<List<int>> generateLimitedAmountOfSideValues(List<List<int>> sides, int minAmountOfTips){
+  print(sides);
+  int size = sides[0].length;
+  Random rand = new Random();
+  int inARow = 0;
+  while(amountOfHints(sides) > minAmountOfTips && inARow < size*size){
+    int nextForDeletion = rand.nextInt(4*size);
+    int row = nextForDeletion~/size;
+    int col = nextForDeletion%size;
+    int val = sides[row][col];
+    sides[row][col] = 0;
+    List<List<int>> field = List.generate(size, (index) => List.generate(size, (index) => 0));
+    List<List<List<int>>> possibleValues = List.generate(size, (index) => List.generate(size, (index) => List.generate(size, (index) => index+1)));
+    firstSteps(sides, field, possibleValues);
+    mainCycle(field, possibleValues);
+    solver(possibleValues, field, sides);
+    print(fields);
+    print(1);
+    if(fields.length > 1){
+      print(2);
+      print(sides);
+      inARow++;
+      sides[row][col] = val;
     }else{
-      sides[rowForElimination][colForElimination] = value;
-      amountOfDoublesInARow++;
+      print(sides);
+      inARow = 0;
     }
+    fields.clear();
   }
+  print(sides);
   return sides;
 }
 
-generateGame(int size, String difficulty){
-  var field = generateField(size);
-  Map<String, dynamic> result = {"field": field};
-  var sides = sideCounts(field, size);
-  var rand = new Random();
-  var splitSides;
-  if(size == 4){
-    int amountOfTips = rand.nextInt(3)+6;
-    splitSides = generateLimitedAmountOfSideValues(field, sides, amountOfTips);
-  }else if(size == 5){
-    if(difficulty == "Easy"){
-      int amountOfTips = rand.nextInt(2) + 11;
-      splitSides = generateLimitedAmountOfSideValues(field, sides, amountOfTips);
-    }else if(difficulty == "Medium"){
-      int amountOfTips = rand.nextInt(2) + 9;
-      splitSides = generateLimitedAmountOfSideValues(field, sides, amountOfTips);
-    }else{
-      int amountOfTips = rand.nextInt(2) + 11;
-      splitSides = generateLimitedAmountOfSideValues(field, sides, amountOfTips);
-    }
-  }else{
-    if(difficulty == "Easy"){
-      int amountOfTips = rand.nextInt(2) + 19;
-      splitSides = generateLimitedAmountOfSideValues(field, sides, amountOfTips);
-    }else if(difficulty == "Medium"){
-      int amountOfTips = rand.nextInt(2) + 17;
-      splitSides = generateLimitedAmountOfSideValues(field, sides, amountOfTips);
-    }else if(difficulty == "Hard"){
-      int amountOfTips = rand.nextInt(2) + 13;
-      splitSides = generateLimitedAmountOfSideValues(field, sides, amountOfTips);
+int amountOfHints(List<List<int>> sides){
+  int amount = 0;
+  for(int i = 0; i < sides.length; i++){
+    for(int j = 0; j < sides[i].length; j++){
+      if(sides[i][j] != 0) amount++;
     }
   }
-  result["SideTips"] = splitSides;
-  return result;
-}
-
-// Function that tells if sides of the changed field equal to its actual sides
-bool correctnessWithoutOneSideHint(List<List<int>> sides, List<List<int>> field){
-  bool correct = true;
-  List<List<int>> sidesOfCurrentField = sideCounts(field, field.length);
-  for(int i = 0; i < sidesOfCurrentField.length; i++){
-    for(int j = 0; j < sidesOfCurrentField[i].length; j++){
-      if(sides[i][j] != 0 && sides[i][j] != sidesOfCurrentField[i][j]){
-        correct = false;
-        break;
-      }
-    }
-    if(!correct)
-      break;
-  }
-  return correct;
+  return amount;
 }
 
 List<List<int>> changeRow(var field1, int row1, int row2, int length){
@@ -208,136 +196,265 @@ List<List<int>> changeCol(var field1, col1, col2, int length){
   return field;
 }
 
-List<List<int>> transpose(List<List<int>> list){
-  List<List<int>> result = List.generate(list.length, (index) => List.generate(list[index].length, (index) => 0));
-  for(int i = 0; i < list.length; i++){
-    for(int j = 0; j < list[i].length; j++){
-      result[i][j] = list[j][i];
-    }
-  }
-  return result;
+void mainCycle(List<List<int>> field, List<List<List<int>>> possibleValues){
+  while(eliminatePossibleValues(possibleValues, field) || fillOneLeft(possibleValues, field) || oneLeftInRowOrColumn(possibleValues, field));
 }
 
-// Function that returns all possible fields switching either two rows or two columns
-List<List<List<int>>> allFields(List<List<int>> field){
-  List<List<List<int>>> fields = [];
-  List<int> listOfNumbersInRangeOfLength = List.generate(field.length, (index) => index);
-  var allPermutations = Permutations(field.length, listOfNumbersInRangeOfLength);
-
-  // Adding all possible permutations of rows
-  for(final permutation in allPermutations()){
-    List<List<int>> nextField = [];
-    for(int i = 0; i < permutation.length; i++){
-      nextField.add(field[permutation[i]]);
-    }
-    fields.add(nextField);
-  }
-
-  var list = List.generate(field.length, (index) => index);
-
-  // Adding all possible permutations of cols
-  for(final permutation in allPermutations()){
-    if(!equalLists(permutation, list)) {
-      List<List<int>> nextField = [];
-      field = transpose(field);
-      for (int i = 0; i < permutation.length; i++) {
-        nextField.add(field[permutation[i]]);
+void firstSteps(List<List<int>> sides, List<List<int>> field, List<List<List<int>>> possibleValues){
+  int size = field.length;
+  for(int i = 0; i < sides.length; i++){
+    for(int j = 0; j < sides[i].length; j++){
+      if(sides[i][j] == 1){
+        switch(i){
+          case 0:
+            field[0][j] = size;
+            break;
+          case 1:
+            field[j][size - 1] = size;
+            break;
+          case 2:
+            field[size - 1][j] = size;
+            break;
+          case 3:
+            field[j][0] = size;
+            break;
+          default:
+            print("Error occurred during main(). ${StackTrace.current}");
+            break;
+        }
+      }else if(sides[i][j] == size){
+        switch (i){
+          case 0:
+            for(int k = 0; k < field.length; k++){
+              field[k][j] = k + 1;
+            }
+            break;
+          case 1:
+            for(int k = 0; k < field[j].length; k++){
+              field[j][k] = field[j].length - k;
+            }
+            break;
+          case 2:
+            for(int k = 0; k < field.length; k++){
+              field[k][j] = field.length - k;
+            }
+            break;
+          case 3:
+            for(int k = 0; k < field[j].length; k++){
+              field[j][k] = k + 1;
+            }
+            break;
+          default:
+            print("Error occurred during main(). ${StackTrace.current}");
+            break;
+        }
+      }else if(sides[i][j] != 0){
+        int min = sides[i][j] - 1;
+        int minForPreMax = sides[i][j] - 2;
+        switch(i){
+          case 0:
+            for(int k = 0; k < min; k++){
+              possibleValues[k][j].removeWhere((element) => element == size);
+            }
+            for(int k = 0; k < minForPreMax; k++){
+              possibleValues[k][j].removeWhere((element) => element == (size - 1));
+            }
+            break;
+          case 1:
+            for(int k = 0; k < min; k++){
+              possibleValues[j][size - k - 1].removeWhere((element) => element == size);
+            }
+            for(int k = 0; k < minForPreMax; k++){
+              possibleValues[j][size - k - 1].removeWhere((element) => element == (size - 1));
+            }
+            break;
+          case 2:
+            for(int k = 0; k < min; k++){
+              possibleValues[size-k-1][j].removeWhere((element) => element == size);
+            }
+            for(int k = 0; k < minForPreMax; k++){
+              possibleValues[size-k-1][j].removeWhere((element) => element == (size - 1));
+            }
+            break;
+          case 3:
+            for(int k = 0; k < min; k++){
+              possibleValues[j][k].removeWhere((element) => element == size);
+            }
+            for(int k = 0; k < minForPreMax; k++){
+              possibleValues[j][k].removeWhere((element) => element == (size - 1));
+            }
+            break;
+          default:
+            print("Error occurred during main(). ${StackTrace.current}");
+            break;
+        }
       }
-      field = transpose(field);
-      nextField = transpose(nextField);
-      fields.add(nextField);
     }
   }
-  int r = fields.length;
+}
 
-  for(final _field in fields){
-    for(int i = 0; i < _field.length; i++){
-      for(int j = 0; j < _field[i].length; j++){
-        stdout.write('${_field[i][j]} ');
-      }
-      stdout.write('\n');
-    }
-    stdout.write('________________\n');
-  }
-
-  print("Field: ");
-
+bool eliminatePossibleValues(List<List<List<int>>> possibleValues, List<List<int>> field){
+  bool changed = false;
   for(int i = 0; i < field.length; i++){
     for(int j = 0; j < field[i].length; j++){
-      stdout.write('${field[i][j]} ');
-    }
-    stdout.write('\n');
-  }
-
-  print("Adding all possible fields switching two numbers(f.e. all 1's are changed to 2, and all 2's are changed to 1's)");
-  // Adding all possible fields switching two numbers(f.e. all 1's are changed to 2, and all 2's are changed to 1's)
-  for(final firstNumber in listOfNumbersInRangeOfLength){
-    for(final secondNumber in listOfNumbersInRangeOfLength){
-      if(secondNumber == firstNumber) continue;
-      List<List<int>> nextField = [];
-      for(int i = 0; i < field.length; i++){
-        List<int> row = [];
-        for(int j = 0; j < field[i].length; j++){
-          if(field[i][j] == firstNumber + 1){
-            row.add(secondNumber + 1);
-          }else if(field[i][j] == secondNumber + 1){
-            row.add(firstNumber + 1);
-          }else{
-            row.add(field[i][j]);
-          }
+      if(field[i][j] != 0){
+        var value = field[i][j];
+        possibleValues[i][j] = [];
+        for(int k = 0; k < possibleValues.length; k++){
+          possibleValues[k][j].removeWhere((element) {
+            if(element == value){
+              changed = true;
+              return true;
+            }else{
+              return false;
+            }
+          });
         }
-        nextField.add(row);
-      }
-      print("Switching ${firstNumber + 1} and ${secondNumber + 1}");
-      for(int i = 0; i < nextField.length; i++){
-        for(int j = 0; j < nextField[i].length; j++){
-          stdout.write('${nextField[i][j]} ');
+        for(int k = 0; k < possibleValues[i].length; k++){
+          possibleValues[i][k].removeWhere((element) {
+            if(element == value){
+              changed = true;
+              return true;
+            }else{
+              return false;
+            }
+          });
         }
-        stdout.write('\n');
       }
-      stdout.write('________________\n');
-      fields.add(nextField);
     }
   }
-
-  return fields;
+  return changed;
 }
 
+bool fillOneLeft(List<List<List<int>>> possibleValues, List<List<int>> field){
+  bool changed = false;
+  for(int i = 0; i < possibleValues.length; i++){
+    for(int j = 0; j < possibleValues[i].length; j++){
+      if(possibleValues[i][j].length == 1){
+        field[i][j] = possibleValues[i][j][0];
+        changed = true;
+      }
+    }
+  }
+  return changed;
+}
 
-// Function that check the equality of two lists
-bool equalLists(List<int> one, List<int> two){
-  for(int i = 0; i < one.length; i++){
-    if(one[i] != two[i]) return false;
+bool oneLeftInRowOrColumn(List<List<List<int>>> possibleValues, List<List<int>> field){
+  bool changed = false;
+  int size = possibleValues.length;
+  for(int r = 0; r < possibleValues.length; r++){
+    List<int> valuesInRow = List.generate(size, (index) => 0);
+    for(int i = 0; i < possibleValues[r].length; i++){
+      for(int j = 0; j < possibleValues[r][i].length; j++){
+        valuesInRow[possibleValues[r][i][j]-1]++;
+      }
+    }
+    if(valuesInRow.indexWhere((element) => element == 1) != -1){
+      List<int> values = [];
+      changed = true;
+      for(int i = 0; i < valuesInRow.length; i++){
+        if(valuesInRow[i] == 1) values.add(i+1);
+      }
+      for(int i = 0; i < possibleValues[r].length; i++){
+        for(int j = 0; j < possibleValues[r][i].length; j++){
+          if(values.contains(possibleValues[r][i][j])) field[r][i] = possibleValues[r][i][j];
+        }
+      }
+    }
+  }
+
+  for(int c = 0; c < possibleValues[0].length; c++){
+    List<int> valuesInCol = List.generate(size, (index) => 0);
+    for(int r = 0; r < possibleValues[0].length; r++){
+      for(int i = 0; i < possibleValues[r][c].length; i++){
+        valuesInCol[possibleValues[r][c][i]-1]++;
+      }
+    }
+    if(valuesInCol.indexWhere((element) => element == 1) != -1){
+      List<int> values = [];
+      changed = true;
+      for(int i = 0; i < valuesInCol.length; i++){
+        if(valuesInCol[i] == 1) values.add(i+1);
+      }
+      for(int r = 0; r < possibleValues[0].length; r++){
+        for(int i = 0; i < possibleValues[r][c].length; i++){
+          if(values.contains(possibleValues[r][c][i])) field[r][c] = possibleValues[r][c][i];
+        }
+      }
+    }
+  }
+  return changed;
+}
+
+List<List<List<int>>> fields = [];
+
+int solver(List<List<List<int>>> possibleValues, List<List<int>> field, List<List<int>> sides){
+  if(fields.length > 1) return 0;
+  int row = -1, col = -1;
+  for(int i = 0; i < field.length; i++){
+    bool found = false;
+    for(int j = 0; j < field[i].length; j++){
+      if(field[i][j] == 0){
+        found = true;
+        row = i;
+        col = j;
+        break;
+      }
+    }
+    if(found) break;
+  }
+  if(row == -1 && col == -1){
+    if(_check(field, sides)){
+      fields.add(field);
+      return 1;
+    }
+    else{
+      return 0;
+    }
+  }else{
+    for(final val in possibleValues[row][col]){
+      field[row][col] = val;
+      List<List<int>> _field = [];
+      for(int i = 0; i < field.length; i++){
+        List<int> temp = [];
+        for(int j = 0; j < field[i].length; j++){
+          temp.add(field[i][j]);
+        }
+        _field.add(temp);
+      }
+
+
+      List<List<List<int>>> _possibleValues = [];
+      for(int i = 0; i < possibleValues.length; i++){
+        List<List<int>> temps = [];
+        for(int j = 0; j < possibleValues[i].length; j++){
+          List<int> temp = [];
+          for(int k = 0; k < possibleValues[i][j].length; k++){
+            temp.add(possibleValues[i][j][k]);
+          }
+          temps.add(temp);
+        }
+        _possibleValues.add(temps);
+      }
+
+      mainCycle(_field, _possibleValues);
+      solver(_possibleValues, _field, sides);
+    }
+    return 0;
+  }
+}
+
+bool _check(List<List<int>> field, List<List<int>> sides){
+  var side = sideCounts(field, field.length);
+  for(int i = 0; i < sides.length; i++){
+    for(int j = 0; j < sides[i].length; j++){
+      if(sides[i][j] != 0 && sides[i][j]!=side[i][j]){
+        return false;
+      }
+    }
   }
   return true;
 }
-
-// Function that returns the amount of correct fields
-// with swapped either rows or columns with one side value deleted
-int correctFieldsWithoutOneSideValue(int rowOfDeleted, int colOfDeleted, List<List<List<int>>> fields, List<List<int>> sides){
-  int res = 0;
-  sides[rowOfDeleted][colOfDeleted] = 0;
-  for(final field in fields){
-    if(correctnessWithoutOneSideHint(sides, field)){
-      res++;
-    }
-  }
-  return res;
-}
-
-
-// Function that counts amount of left numbers at sides after deletion
-int amountOfLeft(List<List<int>> sides){
-  int res = 0;
-  for(int i = 0; i < sides.length; i++){
-    for(int j = 0; j < sides[i].length; j++){
-      if(sides[i][j] != 0) res++;
-    }
-  }
-  return res;
-}
-
-
 
 
 

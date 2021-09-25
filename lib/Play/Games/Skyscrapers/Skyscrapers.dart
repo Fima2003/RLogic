@@ -20,7 +20,7 @@ class SkyScrapers extends StatefulWidget {
 }
 
 class _SkyScrapersState extends State<SkyScrapers> with WidgetsBindingObserver{
-
+  bool loading = false;
   bool initializedTimer = false;
   Timer? _timer;
 
@@ -35,7 +35,7 @@ class _SkyScrapersState extends State<SkyScrapers> with WidgetsBindingObserver{
   late int timesRestarted;
 
   @override
-  void initState() {
+  void initState(){
     WidgetsBinding.instance!.addObserver(this);
     timesRestarted = UserData.getSSRestarted() ?? 0;
     if(UserData.getSSSettings() == null){
@@ -75,7 +75,7 @@ class _SkyScrapersState extends State<SkyScrapers> with WidgetsBindingObserver{
     super.dispose();
   }
 
-  GameSettings strToGS(String jsonString){
+  GameSettings strToGS(String jsonString) {
     var jd = jsonDecode(jsonString);
     GameSettings gs = new GameSettings(
       size: jd["size"],
@@ -266,7 +266,7 @@ class _SkyScrapersState extends State<SkyScrapers> with WidgetsBindingObserver{
                                 : "Size: $_size Difficulty: ${sets.difficulty}";
                             });
                           },
-                          children: List.generate(3, (index) {
+                          children: List.generate(2, (index) {
                             return Center(
                               child: Text(
                                 '${index + 4}',
@@ -285,7 +285,7 @@ class _SkyScrapersState extends State<SkyScrapers> with WidgetsBindingObserver{
                           child: Text('Size',
                             style: Theme.of(context).textTheme.headline3!.copyWith(
                               fontSize: mq.width*0.05,
-                              color: Colors.black
+                  color: Colors.black
                             )
                           ),
                         )
@@ -571,7 +571,7 @@ class _SkyScrapersState extends State<SkyScrapers> with WidgetsBindingObserver{
         crossAxisCount: size,
         shrinkWrap: true,
         children: List.generate(size, (index) =>
-        sets.sides[1][index] == 0 ? hint("") : hint(sets.sides[1][index].toString())),
+        sets.sides[0][index] == 0 ? hint("") : hint(sets.sides[0][index].toString())),
       ),
     );
 
@@ -583,7 +583,7 @@ class _SkyScrapersState extends State<SkyScrapers> with WidgetsBindingObserver{
         crossAxisCount: size,
         shrinkWrap: true,
         children: List.generate(size, (index) =>
-        sets.sides[3][index] == 0 ? hint("") : hint(sets.sides[3][index].toString())),
+        sets.sides[2][index] == 0 ? hint("") : hint(sets.sides[2][index].toString())),
       ),
     );
 
@@ -595,7 +595,7 @@ class _SkyScrapersState extends State<SkyScrapers> with WidgetsBindingObserver{
         crossAxisCount: 1,
         shrinkWrap: true,
         children: List.generate(size, (index) =>
-        sets.sides[0][index] == 0 ? hint("") : hint(sets.sides[0][index].toString())),
+        sets.sides[3][index] == 0 ? hint("") : hint(sets.sides[3][index].toString())),
       ),
     );
 
@@ -607,7 +607,7 @@ class _SkyScrapersState extends State<SkyScrapers> with WidgetsBindingObserver{
         crossAxisCount: 1,
         shrinkWrap: true,
         children: List.generate(size, (index) =>
-        sets.sides[2][index] == 0 ? hint("") : hint(sets.sides[2][index].toString())),
+        sets.sides[1][index] == 0 ? hint("") : hint(sets.sides[1][index].toString())),
       ),
     );
 
@@ -1030,36 +1030,39 @@ class _SkyScrapersState extends State<SkyScrapers> with WidgetsBindingObserver{
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
             Container(
-              margin: EdgeInsets.only(top: mq.height*0.03),
+              margin: EdgeInsets.only(top: mq.height * 0.03),
               width: mq.width,
-              height: mq.height*0.07,
+              height: mq.height * 0.07,
               child: clock(context, sets.time),
             ),
             Container(
               width: mq.width,
-              height: mq.height*(mq.width/mq.height),
-              child: fieldWidget(mq, sets.size, mq.width/(sets.size+2)),
+              height: mq.height * (mq.width / mq.height),
+              child: fieldWidget(mq, sets.size, mq.width / (sets.size + 2)),
             ),
             Container(
-              margin: EdgeInsets.only(bottom: mq.height*0.01),
+              margin: EdgeInsets.only(bottom: mq.height * 0.01),
               width: mq.width,
-              height: mq.height*0.11,
+              height: mq.height * 0.11,
               child: helpers(mq),
             ),
             Container(
-              margin: EdgeInsets.symmetric(vertical: mq.height*0.01),
+              margin: EdgeInsets.symmetric(vertical: mq.height * 0.01),
               width: mq.width,
-              height: mq.height*0.11,
+              height: mq.height * 0.11,
               child: keyboardWidget(mq, sets.size),
-            )
-          ],
+            ),
+          ]
         ),
       ),
     );
   }
 
   void restart(int size, String difficulty){
+    loading = true;
+    setState((){});
     sets.generateNewGame();
+    loading = false;
     pencilMode = false;
     if(_timer != null) {
       _timer!.cancel();
@@ -1192,6 +1195,7 @@ class _SkyScrapersState extends State<SkyScrapers> with WidgetsBindingObserver{
 class GameSettings{
 
   late int size;
+  late bool loading;
   late String difficulty;
   late int hints, checks;
   late List<List<int>> field, sides;
@@ -1204,6 +1208,7 @@ class GameSettings{
   late List<int> clickedPosition;
 
   generateNewGame(){
+    this.loading = true;
     var game = generateGame(this.size, this.difficulty);
     this.field = game["field"];
     this.sides = game["SideTips"];
@@ -1218,6 +1223,7 @@ class GameSettings{
     this.time = 0;
     this.clickedPosition = [];
     this.clickedOnField = false;
+    this.loading = false;
   }
 
   String toJsonString(){

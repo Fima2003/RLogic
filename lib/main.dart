@@ -14,7 +14,9 @@ import 'package:rlogic/UserData.dart';
 
 import 'FirebaseNotifier.dart';
 import 'PurchaseApi.dart';
+
 List<String> testDeviceIds = ['AADC099711B235E9D06E260CFF4F5B29'];
+
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
 
