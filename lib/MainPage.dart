@@ -135,7 +135,7 @@ class _MainPageState extends State<MainPage>{
       ),
       color: Theme.of(context).buttonColor,
       onPressed: () async{
-        const url = "https://policies-for-rlogic.herokuapp.com/privacy_policy.html";
+        const url = "https://r-labs.herokuapp.com/rlogic/privacy_policy.html";
         if(await canLaunch(url)){
           await launch(url);
         }else{
@@ -155,7 +155,7 @@ class _MainPageState extends State<MainPage>{
       ),
       color: Theme.of(context).buttonColor,
       onPressed: () async{
-        const url = "https://policies-for-rlogic.herokuapp.com/terms_conditions.html";
+        const url = "https://r-labs.herokuapp.com/rlogic/terms_conditions.html";
         if(await canLaunch(url)){
           await launch(url);
         }else{
