@@ -6,6 +6,7 @@ import 'package:rlogic/MoreInfo.dart';
 import 'package:rlogic/ThemeSwitcher/config.dart';
 import 'package:rlogic/UserData.dart';
 import 'package:share/share.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'FirebaseNotifier.dart';
 import 'PurchaseApi.dart';
@@ -123,6 +124,78 @@ class _MainPageState extends State<MainPage>{
     }
   }
 
+  showDialogForPolicies(BuildContext context){
+
+    Size mq = MediaQuery.of(context).size;
+
+    Widget privacyPolicy = MaterialButton(
+      child: FittedBox(
+          fit: BoxFit.cover,
+          child: Text("Privacy Policy", style: Theme.of(context).textTheme.button)
+      ),
+      color: Theme.of(context).buttonColor,
+      onPressed: () async{
+        const url = "https://policies-for-rlogic.herokuapp.com/privacy_policy.html";
+        if(await canLaunch(url)){
+          await launch(url);
+        }else{
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text("Could not open website"),
+            )
+          );
+        }
+      },
+    );
+
+    Widget termsAndConditions = MaterialButton(
+      child: FittedBox(
+          fit: BoxFit.cover,
+          child: Text("Terms & Conditions", style: Theme.of(context).textTheme.button)
+      ),
+      color: Theme.of(context).buttonColor,
+      onPressed: () async{
+        const url = "https://policies-for-rlogic.herokuapp.com/terms_conditions.html";
+        if(await canLaunch(url)){
+          await launch(url);
+        }else{
+          ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text("Could not open website"),
+              )
+          );
+        }
+      },
+    );
+
+    AlertDialog dialog () {
+      return new AlertDialog(
+        backgroundColor: Theme.of(context).primaryColor,
+        content: Container(
+          height: mq.height*0.15,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              privacyPolicy,
+              termsAndConditions
+            ],
+          ),
+        ),
+        elevation: 10,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15),
+        ),
+      );
+    }
+    showDialog(
+        context: context,
+        builder: (BuildContext context){
+          return dialog();
+        }
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
 
@@ -138,7 +211,16 @@ class _MainPageState extends State<MainPage>{
         leading: null,
         actions: [
           IconButton(
-            icon: Icon(Icons.share),
+            icon: Icon(Icons.policy_outlined),
+            onPressed: () {
+              showDialogForPolicies(context);
+            },
+            color: Theme.of(context).primaryColorLight,
+            splashRadius: mq.width*0.05,
+            iconSize: mq.width*0.08,
+          ),
+          IconButton(
+            icon: Icon(Icons.share_outlined),
             color: UserData.getTheme() == "Dark" ? Theme.of(context).primaryColorLight: Theme.of(context).primaryColorLight,
             onPressed: () => Share.share(
               'Check this cool app out: https://play.google.com/store/apps/details?id=com.rlabs.rlogic',
@@ -147,8 +229,8 @@ class _MainPageState extends State<MainPage>{
             iconSize: mq.width*0.08,
           ),
           IconButton(
-            icon: Icon(Icons.exit_to_app),
-            color: firebaseNotifier.loggedIn ? Colors.green : UserData.getTheme() == "Light" ? Theme.of(context).primaryColorLight : Theme.of(context).primaryColorLight,
+            icon: Icon(Icons.exit_to_app_outlined),
+            color: firebaseNotifier.loggedIn ? Colors.green : Theme.of(context).primaryColorLight,
             onPressed: () {
               if(firebaseNotifier.loggedIn) {
                 print("Signed out");
